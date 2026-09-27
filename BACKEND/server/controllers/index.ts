@@ -40,7 +40,7 @@ export const authController = {
       res.status(401).json(formatResponse.error('Not authenticated', 401));
       return;
     }
-    const user = authService.getUserById(req.user.id);
+    const user = await authService.getUserById(req.user.id);
     res.json(formatResponse.success(user));
   }
 };
