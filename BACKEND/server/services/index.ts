@@ -1,8 +1,8 @@
-import { getSupabaseClient } from '../config/supabase';
-import { ENV } from '../config/env';
-import { sendPasswordResetEmail } from './emailService';
-import { signToken } from '../utils/jwt';
-import { hashPassword, verifyPassword } from '../utils/hashPassword';
+import { getSupabaseClient } from '../config/supabase.js';
+import { ENV } from '../config/env.js';
+import { sendPasswordResetEmail } from './emailService.js';
+import { signToken } from '../utils/jwt.js';
+import { hashPassword, verifyPassword } from '../utils/hashPassword.js';
 import { createHash, randomBytes } from 'node:crypto';
 
 // AUTH SERVICE

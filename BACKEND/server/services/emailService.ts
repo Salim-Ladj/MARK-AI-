@@ -1,4 +1,4 @@
-import { ENV } from '../config/env';
+import { ENV } from '../config/env.js';
 
 export async function sendPasswordResetEmail(email: string, resetUrl: string): Promise<void> {
   if (!ENV.RESEND_API_KEY) {

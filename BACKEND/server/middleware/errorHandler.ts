@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
-import { formatResponse } from '../utils/responseFormatter';
-import { logger } from '../utils/logger';
+import { formatResponse } from '../utils/responseFormatter.js';
+import { logger } from '../utils/logger.js';
 
 export function errorHandler(err: any, req: Request, res: Response, next: NextFunction): void {
   logger.error('Unhandled API Error:', err);
