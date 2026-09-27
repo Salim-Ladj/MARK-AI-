@@ -1,13 +1,33 @@
 import { createContext, useContext, useMemo, useState, type ReactNode } from 'react';
-
-interface Brand {
-	id: string;
-	name: string;
-}
+import type { Brand } from '../types';
 
 interface User {
 	name: string;
 	avatar?: string;
+}
+
+interface Campaign {
+	id: string;
+	name: string;
+}
+
+interface CalendarItem {
+	id: string;
+	title: string;
+	brandId: string;
+	brandName: string;
+	campaignId: string;
+	campaignName: string;
+	platform: string;
+	format: string;
+	scheduledDate: string;
+	scheduledTime: string;
+	status: string;
+	caption?: string;
+	hashtags?: string;
+	creator?: string;
+	approvedBy?: string;
+	mediaUrl?: string;
 }
 
 interface AppContextValue {
@@ -19,19 +39,32 @@ interface AppContextValue {
 	brands: Brand[];
 	selectedBrand: Brand;
 	setSelectedBrand: (brand: Brand) => void;
+	addBrand: (brand: Omit<Brand, 'id'>) => Brand;
+	campaigns: Campaign[];
+	addTask: (task: Record<string, unknown>) => void;
+	addCalendarItem: (item: Omit<CalendarItem, 'id'>) => void;
+	showToast: (message: string, type?: 'success' | 'error' | 'info') => void;
 }
 
-const brands: Brand[] = [
-	{ id: 'urbana', name: 'URBANA' },
-	{ id: 'northstar', name: 'Northstar' },
-	{ id: 'atelier', name: 'Atelier 09' },
+const initialBrands: Brand[] = [
+	{ id: 'brand-urbana', name: 'URBANA', industry: 'Urban Apparel & Streetwear', toneOfVoice: ['Bold', 'Cultural'] },
+	{ id: 'brand-atlas', name: 'Atlas Botanicals', industry: 'Natural Skincare', toneOfVoice: ['Pure', 'Earthy', 'Zen'] },
+	{ id: 'brand-sahara', name: 'Sahara Nomad', industry: 'Eco-Travel Gear', toneOfVoice: ['Rugged', 'Purposeful'] },
 ];
 
 const AppContext = createContext<AppContextValue | null>(null);
 
 export function AppProvider({ children }: { children: ReactNode }) {
-	const [currentRoute, setCurrentRoute] = useState('/marketing/overview');
-	const [selectedBrand, setSelectedBrand] = useState(brands[0]);
+	const [currentRoute, setCurrentRoute] = useState(() =>
+		window.location.pathname.startsWith('/marketing/') ? window.location.pathname : '/marketing/overview',
+	);
+	const [brands, setBrands] = useState(initialBrands);
+	const [campaigns] = useState<Campaign[]>([
+		{ id: 'camp-kasbah-fall', name: 'Casbah Pulse Winter Drop' },
+		{ id: 'camp-urbana-core', name: 'URBANA Core Essentials' },
+	]);
+	const [calendarItems, setCalendarItems] = useState<CalendarItem[]>([]);
+	const [selectedBrand, setSelectedBrand] = useState(initialBrands[0]);
 	const [currentUser, setCurrentUser] = useState<User>({ name: 'Sarah Jenkins' });
 
 	const value = useMemo<AppContextValue>(() => ({
@@ -44,9 +77,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
 			setCurrentRoute(team === 'creative' ? '/creative/dashboard' : '/marketing/overview');
 		},
 		brands,
+		campaigns,
 		selectedBrand,
 		setSelectedBrand,
-	}), [currentRoute, currentUser, selectedBrand]);
+		addBrand: (brandData) => {
+			const brand = { ...brandData, id: `brand-${Date.now()}` };
+			setBrands((previous) => [...previous, brand]);
+			return brand;
+		},
+		addTask: () => undefined,
+		addCalendarItem: (item) => {
+			setCalendarItems((previous) => [...previous, { ...item, id: `calendar-${Date.now()}` }]);
+		},
+		showToast: (message, type = 'success') => {
+			console.info(`[${type}] ${message}`);
+		},
+	}), [brands, campaigns, currentRoute, currentUser, selectedBrand, calendarItems]);
 
 	return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 }
