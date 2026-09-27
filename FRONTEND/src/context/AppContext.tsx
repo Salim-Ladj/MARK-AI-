@@ -59,7 +59,7 @@ const AppContext = createContext<AppContextValue | null>(null);
 
 export function AppProvider({ children }: { children: ReactNode }) {
 	const [currentRoute, setCurrentRoute] = useState(() =>
-		window.location.pathname === '/' ? '/marketing/overview' : window.location.pathname,
+		window.location.pathname === '/' ? '/login' : window.location.pathname,
 	);
 	const [brands, setBrands] = useState(initialBrands);
 	const [campaigns, setCampaigns] = useState<Campaign[]>([
