@@ -1,6 +1,6 @@
 import { Response, NextFunction } from 'express';
-import { AuthenticatedRequest } from './authMiddleware';
-import { formatResponse } from '../utils/responseFormatter';
+import { AuthenticatedRequest } from './authMiddleware.js';
+import { formatResponse } from '../utils/responseFormatter.js';
 
 export function roleMiddleware(allowedRoles: ('marketing' | 'creative')[]) {
   return (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {

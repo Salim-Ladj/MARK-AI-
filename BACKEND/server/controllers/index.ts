@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
-import { authService } from '../services/index';
-import { formatResponse } from '../utils/responseFormatter';
-import { logger } from '../utils/logger';
+import { authService } from '../services/index.js';
+import { formatResponse } from '../utils/responseFormatter.js';
+import { logger } from '../utils/logger.js';
 
 export const authController = {
   register: async (req: Request, res: Response) => {

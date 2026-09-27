@@ -1,11 +1,14 @@
 import express from 'express';
-import apiRouter from './server/routes/index';
-import { errorHandler } from './server/middleware/errorHandler';
-import { logger } from './server/utils/logger';
-import { ENV } from './server/config/env';
+import apiRouter from './server/routes/index.js';
+import { errorHandler } from './server/middleware/errorHandler.js';
+import { logger } from './server/utils/logger.js';
+import { ENV } from './server/config/env.js';
 
 const app = express();
 const PORT = Number(ENV.PORT) || 5000;
+
+// Keep AI request bodies intact so JSON and multipart uploads can be relayed.
+app.use('/api/ai', express.raw({ type: '*/*', limit: '25mb' }));
 
 // Middleware
 app.use(express.json({ limit: '10mb' }));
