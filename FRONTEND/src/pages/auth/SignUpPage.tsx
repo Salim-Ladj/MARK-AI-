@@ -10,6 +10,7 @@ import {
   EyeOff,
   ArrowRight
 } from 'lucide-react';
+import { api } from '../../services/api';
 
 interface SignUpPageProps {
   onNavigate?: (route: 'login' | 'signup') => void;
@@ -29,7 +30,7 @@ export default function SignUpPage({ onNavigate }: SignUpPageProps) {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
 
@@ -59,13 +60,15 @@ export default function SignUpPage({ onNavigate }: SignUpPageProps) {
     }
 
     setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      await api.auth.register(fullName.trim(), email.trim(), password);
       setSuccess(true);
-      setTimeout(() => {
-        if (onNavigate) onNavigate('login');
-      }, 1400);
-    }, 800);
+      window.setTimeout(() => onNavigate?.('login'), 1400);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to create your workspace.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

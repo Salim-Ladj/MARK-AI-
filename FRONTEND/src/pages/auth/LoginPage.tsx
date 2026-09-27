@@ -12,6 +12,7 @@ import {
   ShieldCheck,
   Cpu
 } from 'lucide-react';
+import { api } from '../../services/api';
 
 interface LoginPageProps {
   onNavigate?: (route: 'login' | 'signup' | 'forgot-password') => void;
@@ -41,20 +42,14 @@ export default function LoginPage({ onNavigate, onLoginSuccess }: LoginPageProps
 
     setIsLoading(true);
     try {
-      const res = await fetch('http://localhost:5000/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim(), password })
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Invalid credentials');
+      const response = await api.auth.login(email.trim(), password);
 
       // Store token & user
-      localStorage.setItem('markai_token', data.data.token);
-      localStorage.setItem('markai_user', JSON.stringify(data.data.user));
+      localStorage.setItem('markai_token', response.data.token);
+      localStorage.setItem('markai_user', JSON.stringify(response.data.user));
 
       if (onLoginSuccess) {
-        onLoginSuccess(data.data.user);
+        onLoginSuccess(response.data.user);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Invalid credentials. You can use a 1-Click Demo card above.');

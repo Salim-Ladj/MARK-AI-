@@ -56,7 +56,7 @@ const AppContext = createContext<AppContextValue | null>(null);
 
 export function AppProvider({ children }: { children: ReactNode }) {
 	const [currentRoute, setCurrentRoute] = useState(() =>
-		window.location.pathname.startsWith('/marketing/') ? window.location.pathname : '/marketing/overview',
+		window.location.pathname === '/' ? '/marketing/overview' : window.location.pathname,
 	);
 	const [brands, setBrands] = useState(initialBrands);
 	const [campaigns] = useState<Campaign[]>([
@@ -66,15 +66,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
 	const [calendarItems, setCalendarItems] = useState<CalendarItem[]>([]);
 	const [selectedBrand, setSelectedBrand] = useState(initialBrands[0]);
 	const [currentUser, setCurrentUser] = useState<User>({ name: 'Sarah Jenkins' });
+	const navigateTo = (route: string) => {
+		if (window.location.pathname !== route) {
+			window.history.pushState({}, '', route);
+		}
+		setCurrentRoute(route);
+	};
 
 	const value = useMemo<AppContextValue>(() => ({
 		currentRoute,
-		navigateTo: setCurrentRoute,
+		navigateTo,
 		currentUser,
-		logout: () => setCurrentRoute('/login'),
+		logout: () => navigateTo('/login'),
 		loginAs: (team) => {
 			setCurrentUser({ name: team === 'creative' ? 'Alex Morgan' : 'Sarah Jenkins' });
-			setCurrentRoute(team === 'creative' ? '/creative/dashboard' : '/marketing/overview');
+			navigateTo(team === 'creative' ? '/creative/dashboard' : '/marketing/overview');
 		},
 		brands,
 		campaigns,
