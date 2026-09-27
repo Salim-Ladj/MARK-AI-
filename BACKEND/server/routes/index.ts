@@ -17,7 +17,9 @@ const apiRouter = Router();
 
 // ===================== AUTH ROUTES =====================
 apiRouter.post('/auth/login', authController.login);
+apiRouter.post('/auth/register', authController.register);
 apiRouter.post('/auth/forgot-password', authController.forgotPassword);
+apiRouter.post('/auth/reset-password', authController.resetPassword);
 apiRouter.get('/auth/me', authMiddleware as any, authController.me as any);
 
 // ===================== BRAND ROUTES (Marketing only for mutations) =====================

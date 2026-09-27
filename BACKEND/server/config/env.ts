@@ -8,5 +8,8 @@ export const ENV = {
   GEMINI_API_KEY: process.env.GEMINI_API_KEY || '',
   SUPABASE_URL: process.env.SUPABASE_URL || '',
   SUPABASE_PUBLISHABLE_KEY: process.env.SUPABASE_PUBLISHABLE_KEY || '',
-  SUPABASE_SECRET_KEY: process.env.SUPABASE_SECRET_KEY || ''
+  SUPABASE_SECRET_KEY: process.env.SUPABASE_SECRET_KEY || '',
+  RESEND_API_KEY: process.env.RESEND_API_KEY || '',
+  EMAIL_FROM: process.env.EMAIL_FROM || 'MarkAI <onboarding@resend.dev>',
+  FRONTEND_URL: process.env.FRONTEND_URL || 'http://localhost:5173'
 };

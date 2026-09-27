@@ -16,6 +16,15 @@ import { logger } from '../utils/logger';
 
 // AUTH CONTROLLER
 export const authController = {
+  register: async (req: Request, res: Response) => {
+    try {
+      const { full_name, email, password, role } = req.body;
+      const result = await authService.register(full_name, email, password, role);
+      res.status(201).json(formatResponse.success(result, 'Account created successfully'));
+    } catch (err: any) {
+      res.status(400).json(formatResponse.error(err.message, 400));
+    }
+  },
   login: async (req: Request, res: Response) => {
     try {
       const { email, password } = req.body;
@@ -26,14 +35,23 @@ export const authController = {
     }
   },
   forgotPassword: async (req: Request, res: Response) => {
-    const { email } = req.body;
-    logger.info(`Password reset requested for ${email}`);
-    res.json(
-      formatResponse.success(
-        { email, resetInitiated: true },
-        'A secure password reset link has been dispatched to your email address.'
-      )
-    );
+    try {
+      const { email } = req.body;
+      await authService.requestPasswordReset(email);
+      logger.info(`Password reset requested for ${email}`);
+      res.json(formatResponse.success({ resetInitiated: true }, 'If the email exists, a reset link has been sent.'));
+    } catch (err: any) {
+      res.status(400).json(formatResponse.error(err.message, 400));
+    }
+  },
+  resetPassword: async (req: Request, res: Response) => {
+    try {
+      const { token, password } = req.body;
+      await authService.resetPassword(token, password);
+      res.json(formatResponse.success(null, 'Password reset successfully'));
+    } catch (err: any) {
+      res.status(400).json(formatResponse.error(err.message, 400));
+    }
   },
   me: async (req: AuthenticatedRequest, res: Response) => {
     if (!req.user) {
