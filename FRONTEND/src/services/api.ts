@@ -56,19 +56,110 @@ export const api = {
       }),
   },
   brands: {
-    getAll: async () => (await fetch(`${API_BASE}/brands`, { headers: getAuthHeader() })).json(),
+    getAll: () => request<unknown[]>('/brands', { headers: getAuthHeader() }),
+    create: (brand: Record<string, unknown>) => request<unknown>('/brands', {
+      method: 'POST',
+      headers: getAuthHeader(),
+      body: JSON.stringify(brand),
+    }),
+    update: (id: string, brand: Record<string, unknown>) => request<unknown>(`/brands/${id}`, {
+      method: 'PATCH',
+      headers: getAuthHeader(),
+      body: JSON.stringify(brand),
+    }),
   },
   campaigns: {
-    getAll: async () => (await fetch(`${API_BASE}/campaigns`, { headers: getAuthHeader() })).json(),
+    getAll: () => request<unknown[]>('/campaigns', { headers: getAuthHeader() }),
+    create: (campaign: Record<string, unknown>) => request<unknown>('/campaigns', {
+      method: 'POST',
+      headers: getAuthHeader(),
+      body: JSON.stringify(campaign),
+    }),
   },
   tasks: {
-    getAll: async () => (await fetch(`${API_BASE}/tasks`, { headers: getAuthHeader() })).json(),
-    submit: async (id: string, payload: any) => {
-      return (await fetch(`${API_BASE}/tasks/${id}/submit`, {
+    getAll: () => request<unknown[]>('/tasks', { headers: getAuthHeader() }),
+    create: (payload: Record<string, unknown>) => request<unknown>('/tasks', {
+      method: 'POST',
+      headers: getAuthHeader(),
+      body: JSON.stringify(payload),
+    }),
+    submit: async (id: string, payload: Record<string, unknown>) => {
+      const response = await fetch(`${API_BASE}/tasks/${id}/submit`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
         body: JSON.stringify(payload)
-      })).json();
-    }
+      });
+      return response.json();
+    },
+  },
+  calendar: {
+    getAll: () => request<unknown[]>('/calendar', { headers: getAuthHeader() }),
+    create: (payload: Record<string, unknown>) => request<unknown>('/calendar', {
+      method: 'POST',
+      headers: getAuthHeader(),
+      body: JSON.stringify(payload),
+    }),
+  },
+  assets: {
+    getAll: () => request<unknown[]>('/assets', { headers: getAuthHeader() }),
+  },
+  creativeTeam: {
+    getAll: () => request<unknown[]>('/creative-team', { headers: getAuthHeader() }),
+  },
+  performance: {
+    get: () => request<{
+      reach: number;
+      impressions: number;
+      engagementRate: number;
+      linkClicks: number;
+      attributedOrders: number;
+    }>('/performance', { headers: getAuthHeader() }),
+  },
+  overview: {
+    get: () => request<{
+      activeBrands: number;
+      liveCampaigns: number;
+      scheduledDrops: number;
+      completedAssets: number;
+      activeCampaigns: Array<{ id: string; name: string; channel: string; pace: number }>;
+    }>('/overview', { headers: getAuthHeader() }),
+  },
+  ai: {
+    generate: async (payload: Record<string, unknown>) => {
+      const response = await fetch(`${API_BASE}/ai/generate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
+        body: JSON.stringify(payload),
+      });
+      const data = await response.json() as unknown;
+      if (!response.ok) {
+        const message = typeof data === 'object' && data !== null && 'message' in data
+          ? String(data.message)
+          : 'AI generation failed';
+        throw new Error(message);
+      }
+      return data;
+    },
+  },
+  creative: {
+    getDashboard: () => request<Record<string, number>>('/creative/dashboard', { headers: getAuthHeader() }),
+    getBriefs: () => request<unknown[]>('/creative/briefs', { headers: getAuthHeader() }),
+    getReviews: () => request<unknown[]>('/creative/reviews', { headers: getAuthHeader() }),
+    getCompleted: () => request<unknown[]>('/creative/completed', { headers: getAuthHeader() }),
+    submitWork: (payload: Record<string, unknown>) => request<unknown>('/creative/submissions', {
+      method: 'POST',
+      headers: getAuthHeader(),
+      body: JSON.stringify(payload),
+    }),
+    submitRevision: (payload: Record<string, unknown>) => request<unknown>('/creative/revisions', {
+      method: 'POST',
+      headers: getAuthHeader(),
+      body: JSON.stringify(payload),
+    }),
+    archiveWork: (payload: Record<string, unknown>) => request<unknown>('/creative/archive', {
+      method: 'POST',
+      headers: getAuthHeader(),
+      body: JSON.stringify(payload),
+    }),
   }
 };

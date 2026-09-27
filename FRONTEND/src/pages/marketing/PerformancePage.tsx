@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useApp } from '../../context/AppContext';
+import { api } from '../../services/api';
 import {
   TrendingUp,
   Download,
@@ -17,6 +18,37 @@ import {
 export const PerformancePage: React.FC = () => {
   const { navigateTo, showToast } = useApp();
   const [dateRange] = useState('Oct 18 - Nov 17, 2025 (30D)');
+  const [metrics, setMetrics] = useState({
+    reach: 842600,
+    impressions: 2140000,
+    engagementRate: 5.82,
+    linkClicks: 48900,
+    attributedOrders: 1420,
+  });
+  const [pulseSummary, setPulseSummary] = useState('Deep learning visual analysis scanned 42 creative variations across Meta & TikTok against real-time conversion velocities for Casbah Pulse.');
+
+  useEffect(() => {
+    if (!localStorage.getItem('markai_token')) return;
+    api.performance.get()
+      .then(({ data }) => setMetrics(data))
+      .catch(() => undefined);
+  }, []);
+
+  const generatePulseFindings = async () => {
+    try {
+      const response = await api.ai.generate({
+        purpose: 'performance_pulse',
+        campaign: 'Casbah Pulse',
+        metrics,
+      });
+      if (typeof response === 'object' && response !== null && 'summary' in response) {
+        setPulseSummary(String(response.summary));
+      }
+      showToast('AI performance pulse refreshed.', 'success');
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'AI performance analysis unavailable.', 'error');
+    }
+  };
 
   return (
     <div className="space-y-6 pb-12 font-sans antialiased text-slate-800">
@@ -85,7 +117,7 @@ export const PerformancePage: React.FC = () => {
             </div>
           </div>
           <div className="mt-2">
-            <div className="text-xl font-black text-slate-900">842.6K</div>
+            <div className="text-xl font-black text-slate-900">{(metrics.reach / 1000).toFixed(1)}K</div>
             <div className="text-[10px] text-emerald-600 font-semibold mt-0.5">↗ +24.8% vs prev 30d</div>
             <div className="h-6 w-full mt-2">
               <svg className="w-full h-full" viewBox="0 0 100 24" preserveAspectRatio="none">
@@ -103,7 +135,7 @@ export const PerformancePage: React.FC = () => {
             </div>
           </div>
           <div className="mt-2">
-            <div className="text-xl font-black text-slate-900">2.14M</div>
+            <div className="text-xl font-black text-slate-900">{(metrics.impressions / 1000000).toFixed(2)}M</div>
             <div className="text-[10px] text-purple-600 font-semibold mt-0.5">↗ +18.2% frequency 2.54</div>
             <div className="h-6 w-full mt-2">
               <svg className="w-full h-full" viewBox="0 0 100 24" preserveAspectRatio="none">
@@ -121,7 +153,7 @@ export const PerformancePage: React.FC = () => {
             </div>
           </div>
           <div className="mt-2">
-            <div className="text-xl font-black text-slate-900">5.82%</div>
+            <div className="text-xl font-black text-slate-900">{metrics.engagementRate.toFixed(2)}%</div>
             <div className="text-[10px] text-cyan-700 font-semibold mt-0.5">↑ +1.4% above bench</div>
             <div className="h-6 w-full mt-2">
               <svg className="w-full h-full" viewBox="0 0 100 24" preserveAspectRatio="none">
@@ -139,7 +171,7 @@ export const PerformancePage: React.FC = () => {
             </div>
           </div>
           <div className="mt-2">
-            <div className="text-xl font-black text-slate-900">48.9K</div>
+            <div className="text-xl font-black text-slate-900">{(metrics.linkClicks / 1000).toFixed(1)}K</div>
             <div className="text-[10px] text-sky-600 font-semibold mt-0.5">CTR 2.28% • CPC $0.41</div>
             <div className="h-6 w-full mt-2">
               <svg className="w-full h-full" viewBox="0 0 100 24" preserveAspectRatio="none">
@@ -155,7 +187,7 @@ export const PerformancePage: React.FC = () => {
             <span className="text-[10px] font-bold text-purple-700 bg-purple-50 px-1.5 py-0.5 rounded">ROAS 3.82x</span>
           </div>
           <div className="mt-2">
-            <div className="text-xl font-black text-slate-900">1,420</div>
+            <div className="text-xl font-black text-slate-900">{metrics.attributedOrders.toLocaleString()}</div>
             <div className="text-[11px] font-bold text-sky-600">$89.2K <span className="text-slate-400 font-normal">Attributed GMV</span></div>
             <div className="flex items-center justify-between text-[10px] text-slate-400 mt-2 font-medium">
               <span>Target: 1,200</span>
@@ -181,7 +213,7 @@ export const PerformancePage: React.FC = () => {
               </span>
             </div>
             <p className="text-xs text-slate-500 mt-1 max-w-xl leading-relaxed">
-              Deep learning visual analysis scanned 42 creative variations across Meta & TikTok against real-time conversion velocities for Casbah Pulse.
+              {pulseSummary}
             </p>
           </div>
         </div>
@@ -189,7 +221,7 @@ export const PerformancePage: React.FC = () => {
         <div className="flex items-center gap-2 shrink-0">
           <button
             type="button"
-            onClick={() => showToast('Configured telemetry weights')}
+            onClick={generatePulseFindings}
             className="px-3.5 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 transition-colors cursor-pointer"
           >
             Configure Parameters

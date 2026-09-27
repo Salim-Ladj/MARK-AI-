@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { CREATIVE_ASSETS } from './creativeAssets';
+import { api } from '../../services/api';
 import {
   Search,
   Calendar,
@@ -19,9 +20,22 @@ export const CompletedWorkPage: React.FC = () => {
   const { navigateTo, showToast } = useApp();
   const [activeFilter, setActiveFilter] = useState<'all' | '3d' | 'motion' | 'stills'>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [archivedCount, setArchivedCount] = useState(0);
+
+  useEffect(() => {
+    if (!localStorage.getItem('markai_token')) return;
+    api.creative.getCompleted()
+      .then(({ data }) => setArchivedCount(data.length))
+      .catch(() => undefined);
+  }, []);
 
   const handleDownload = (pkgName: string) => {
-    showToast(`Preparing cryptographically signed archive for download: ${pkgName}`, 'success');
+    void api.creative.archiveWork({ packageName: pkgName, status: 'archived' })
+      .then(() => {
+        setArchivedCount((count) => count + 1);
+        showToast(`Preparing cryptographically signed archive for download: ${pkgName}`, 'success');
+      })
+      .catch((error: unknown) => showToast(error instanceof Error ? error.message : 'Unable to sync archive request.', 'error'));
   };
 
   return (
@@ -36,7 +50,7 @@ export const CompletedWorkPage: React.FC = () => {
             Completed & Approved Work
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-3xl leading-relaxed">
-            14 Assets Approved • 100% Quality Rating • All production master files packaged & cryptographically signed
+            {14 + archivedCount} Assets Approved • 100% Quality Rating • All production master files packaged & cryptographically signed
           </p>
         </div>
 

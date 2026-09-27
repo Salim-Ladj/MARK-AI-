@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { CREATIVE_ASSETS } from './creativeAssets';
+import { api } from '../../services/api';
 import {
   Search,
   Shield,
@@ -36,6 +37,14 @@ export const CreativeBriefsPage: React.FC = () => {
   const { navigateTo } = useApp();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeModalBrief, setActiveModalBrief] = useState<BriefCardData | null>(null);
+  const [activeBriefCount, setActiveBriefCount] = useState(14);
+
+  React.useEffect(() => {
+    if (!localStorage.getItem('markai_token')) return;
+    api.creative.getBriefs()
+      .then(({ data }) => setActiveBriefCount(data.length))
+      .catch(() => undefined);
+  }, []);
 
   const briefs: BriefCardData[] = [
     {
@@ -142,7 +151,7 @@ export const CreativeBriefsPage: React.FC = () => {
         <div className="flex items-center gap-3 shrink-0">
           <div className="flex items-center gap-2 bg-white px-3.5 py-2 rounded-xl border border-slate-200/80 shadow-xs text-xs font-semibold text-slate-700">
             <Shield className="w-4 h-4 text-cyan-700" />
-            <span>14 Briefs Active</span>
+            <span>{activeBriefCount} Briefs Active</span>
             <span className="text-slate-300">•</span>
             <span className="text-slate-500">All Verified</span>
           </div>

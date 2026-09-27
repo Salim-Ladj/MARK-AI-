@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { CREATIVE_ASSETS } from './creativeAssets';
+import { api } from '../../services/api';
 import {
   Search,
   ChevronDown,
@@ -22,6 +23,8 @@ export const MyTasksPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
 
   const handleQuickSubmit = () => {
+    void api.creative.submitWork({ source: 'quick-submission', status: 'queued' })
+      .catch((error: unknown) => showToast(error instanceof Error ? error.message : 'Unable to sync quick submission.', 'error'));
     showToast('Quick Submission drawer opened. Drag files to queue immediate render passes.', 'info');
   };
 

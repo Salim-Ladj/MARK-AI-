@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
+import { api } from '../../services/api';
 import {
   ChevronLeft,
   ChevronRight,
@@ -19,6 +20,50 @@ export const CalendarPage: React.FC = () => {
   const [viewMode, setViewMode] = useState<'Monthly' | 'Weekly' | 'List View'>('Monthly');
   const [channelFilter, setChannelFilter] = useState<'All' | 'Instagram' | 'TikTok' | 'Newsletter'>('All');
   const [isScheduleOpen, setIsScheduleOpen] = useState(false);
+  const [scheduleTitle, setScheduleTitle] = useState('Casbah Pulse Limited Pre-Order Drop');
+  const [schedulePlatform, setSchedulePlatform] = useState('Instagram');
+  const [scheduleFormat, setScheduleFormat] = useState('Carousel (4:5)');
+  const [scheduleDate, setScheduleDate] = useState('2026-11-18');
+  const [scheduleTime, setScheduleTime] = useState('16:00');
+
+  const handleScheduleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    let caption = `Discover ${scheduleTitle} from ${selectedBrand?.name || 'URBANA'} on ${schedulePlatform}.`;
+
+    try {
+      const generated = await api.ai.generate({
+        purpose: 'calendar_caption',
+        brand: selectedBrand?.name || 'URBANA',
+        campaign: campaigns[0]?.name || 'Casbah Pulse Winter Drop',
+        title: scheduleTitle,
+        platform: schedulePlatform,
+        format: scheduleFormat,
+      });
+      if (typeof generated === 'object' && generated !== null && 'caption' in generated) {
+        caption = String(generated.caption);
+      }
+    } catch {
+      showToast('AI caption service unavailable; using a standard caption.', 'info');
+    }
+
+    addCalendarItem({
+      title: scheduleTitle,
+      brandId: selectedBrand?.id || 'brand-urbana',
+      brandName: selectedBrand?.name || 'URBANA',
+      campaignId: campaigns[0]?.id || 'camp-kasbah-fall',
+      campaignName: campaigns[0]?.name || 'Casbah Pulse Winter Drop',
+      platform: schedulePlatform,
+      format: scheduleFormat,
+      scheduledDate: scheduleDate,
+      scheduledTime: scheduleTime,
+      caption,
+      hashtags: '#URBANA #CasbahDrop',
+      status: 'scheduled',
+      creator: 'Sarah Jenkins',
+    });
+    setIsScheduleOpen(false);
+    showToast('Scheduled to Content Calendar successfully!', 'success');
+  };
 
   const handleAddStagedItem = (title: string, format: string, platform: any) => {
     addCalendarItem({
@@ -532,11 +577,7 @@ export const CalendarPage: React.FC = () => {
             </div>
 
             <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                setIsScheduleOpen(false);
-                showToast('Scheduled to Content Calendar successfully!', 'success');
-              }}
+              onSubmit={handleScheduleSubmit}
               className="mt-4 space-y-3.5 text-xs text-left"
             >
               <div>
@@ -544,7 +585,8 @@ export const CalendarPage: React.FC = () => {
                 <input
                   type="text"
                   required
-                  defaultValue="Casbah Pulse Limited Pre-Order Drop"
+                  value={scheduleTitle}
+                  onChange={(e) => setScheduleTitle(e.target.value)}
                   className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl"
                 />
               </div>
@@ -552,7 +594,7 @@ export const CalendarPage: React.FC = () => {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block font-semibold text-slate-700 mb-1">Platform</label>
-                  <select className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl">
+                  <select value={schedulePlatform} onChange={(e) => setSchedulePlatform(e.target.value)} className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl">
                     <option>Instagram</option>
                     <option>TikTok</option>
                     <option>Newsletter</option>
@@ -561,7 +603,7 @@ export const CalendarPage: React.FC = () => {
                 </div>
                 <div>
                   <label className="block font-semibold text-slate-700 mb-1">Format</label>
-                  <select className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl">
+                  <select value={scheduleFormat} onChange={(e) => setScheduleFormat(e.target.value)} className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl">
                     <option>Carousel (4:5)</option>
                     <option>Reel (9:16)</option>
                     <option>Story</option>
@@ -575,7 +617,8 @@ export const CalendarPage: React.FC = () => {
                   <label className="block font-semibold text-slate-700 mb-1">Date</label>
                   <input
                     type="date"
-                    defaultValue="2026-11-18"
+                    value={scheduleDate}
+                    onChange={(e) => setScheduleDate(e.target.value)}
                     className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl"
                   />
                 </div>
@@ -583,7 +626,8 @@ export const CalendarPage: React.FC = () => {
                   <label className="block font-semibold text-slate-700 mb-1">Time</label>
                   <input
                     type="time"
-                    defaultValue="16:00"
+                    value={scheduleTime}
+                    onChange={(e) => setScheduleTime(e.target.value)}
                     className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl"
                   />
                 </div>

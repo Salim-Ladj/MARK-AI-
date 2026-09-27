@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { CREATIVE_ASSETS } from './creativeAssets';
+import { api } from '../../services/api';
 import {
   Play,
   Pause,
@@ -29,6 +30,8 @@ export const ReviewRevisionsPage: React.FC = () => {
 
   const handleSubmitRevision = (e: React.FormEvent) => {
     e.preventDefault();
+    void api.creative.submitRevision({ title: 'Casbah Hooded Vest Macro Fabric 3D', notes: revisionNotes, status: 'under_review' })
+      .catch((error: unknown) => showToast(error instanceof Error ? error.message : 'Unable to sync revision.', 'error'));
     showToast('Revision v2.0 successfully submitted to Sarah Jenkins for approval.', 'success');
   };
 

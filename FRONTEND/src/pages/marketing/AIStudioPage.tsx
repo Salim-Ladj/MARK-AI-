@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
+import { api } from '../../services/api';
 import {
   Sparkles,
   Sliders,
@@ -286,12 +287,25 @@ export const AIStudioPage: React.FC = () => {
             <button
               type="button"
               disabled={isGenerating}
-              onClick={() => {
+              onClick={async () => {
                 setIsGenerating(true);
-                setTimeout(() => {
-                  setIsGenerating(false);
+                try {
+                  await api.ai.generate({
+                    brand: selectedBrand?.name || 'URBANA',
+                    campaign: campaigns[0]?.name || 'Casbah Pulse Winter Drop',
+                    objective,
+                    channels: selectedChannels,
+                    format: creativeFormat,
+                    tone: toneSetting,
+                    slangPercentage,
+                    directives: creativeDirectives,
+                  });
                   showToast('Synthesized 2 new strategy briefs!', 'success');
-                }, 800);
+                } catch (error) {
+                  showToast(error instanceof Error ? error.message : 'AI generation failed.', 'error');
+                } finally {
+                  setIsGenerating(false);
+                }
               }}
               className="w-full py-3 px-4 rounded-2xl font-bold text-white bg-gradient-to-r from-[#0284c7] via-[#0ea5e9] to-[#38bdf8] hover:opacity-95 shadow-md shadow-sky-500/25 active:scale-[0.99] transition-all flex items-center justify-center gap-2 text-xs tracking-wide cursor-pointer disabled:opacity-70"
             >

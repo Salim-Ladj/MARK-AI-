@@ -32,6 +32,25 @@ export const authService = {
     return { user, token: signToken({ id: user.id, email: user.email, role: user.role }) };
   },
   login: async (email: string, passwordPlain: string) => {
+    const demoUsers = [
+      { email: 'marketing@markai.demo', password: 'Marketing123!', name: 'Sarah Jenkins', role: 'marketing' as const },
+      { email: 'creative@markai.demo', password: 'Creative123!', name: 'Alex Rivera', role: 'creative' as const },
+    ];
+    const demoUser = demoUsers.find((user) => user.email === email?.trim().toLowerCase());
+    if (demoUser && demoUser.password === passwordPlain) {
+      const user = {
+        id: `demo-${demoUser.role}`,
+        email: demoUser.email,
+        name: demoUser.name,
+        role: demoUser.role,
+        createdAt: new Date(0).toISOString(),
+      };
+      return {
+        user,
+        token: signToken({ id: user.id, email: user.email, role: user.role }),
+      };
+    }
+
     const { data, error } = await getSupabaseClient()
       .from('Marketing')
       .select('id, created_at, full_name, email, password, role')

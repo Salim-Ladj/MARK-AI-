@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { CREATIVE_ASSETS } from './creativeAssets';
+import { api } from '../../services/api';
 import {
   Upload,
   FileText,
@@ -32,6 +33,8 @@ export const CreativeDashboardPage: React.FC = () => {
   const handleConfirmUpload = (e: React.FormEvent) => {
     e.preventDefault();
     setShowUploadModal(false);
+    void api.creative.submitWork({ title: modalTitle, note: uploadNote, status: 'under_review' })
+      .catch((error: unknown) => showToast(error instanceof Error ? error.message : 'Unable to sync submission.', 'error'));
     showToast(`Asset package submitted for review: ${modalTitle}`, 'success');
   };
 

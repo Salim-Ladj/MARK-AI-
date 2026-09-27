@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { api } from '../../services/api';
+import { useApp } from '../../context/AppContext';
 import {
   Tag,
   PenSquare,
@@ -24,6 +26,23 @@ import {
 } from 'lucide-react';
 
 export const OverviewPage: React.FC = () => {
+  const { addCampaign, showToast } = useApp();
+  const [isCampaignModalOpen, setIsCampaignModalOpen] = useState(false);
+  const [campaignName, setCampaignName] = useState('');
+  const [overviewData, setOverviewData] = useState({
+    activeBrands: 3,
+    liveCampaigns: 4,
+    scheduledDrops: 18,
+    completedAssets: 42,
+  });
+
+  useEffect(() => {
+    if (!localStorage.getItem('markai_token')) return;
+    api.overview.get()
+      .then(({ data }) => setOverviewData(data))
+      .catch(() => undefined);
+  }, []);
+
   // Modal state for Inspecting deliverables
   const [inspectModalTask, setInspectModalTask] = useState<{
     id: string;
@@ -74,6 +93,7 @@ export const OverviewPage: React.FC = () => {
           <div className="flex items-center gap-2">
             <button
               type="button"
+              onClick={() => setIsCampaignModalOpen(true)}
               className="px-3.5 py-2 rounded-xl bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-xs font-bold text-slate-700 shadow-xs flex items-center justify-center gap-2 transition-all cursor-pointer"
             >
               <PenSquare className="w-3.5 h-3.5 text-sky-600" />
@@ -110,7 +130,7 @@ export const OverviewPage: React.FC = () => {
             </div>
           </div>
           <div className="mt-4">
-            <div className="text-2xl font-black text-slate-900">3 Brands</div>
+            <div className="text-2xl font-black text-slate-900">{overviewData.activeBrands} Brands</div>
             <div className="flex items-center gap-1.5 mt-2">
               <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-sky-50 text-sky-700 border border-sky-200">
                 Primary
@@ -131,7 +151,7 @@ export const OverviewPage: React.FC = () => {
             </div>
           </div>
           <div className="mt-4">
-            <div className="text-2xl font-black text-slate-900">4 Active</div>
+            <div className="text-2xl font-black text-slate-900">{overviewData.liveCampaigns} Active</div>
             <div className="flex items-center gap-1.5 mt-2 text-xs font-semibold text-emerald-600">
               <TrendingUp className="w-3.5 h-3.5" />
               <span>+1 launched this week</span>
@@ -151,7 +171,7 @@ export const OverviewPage: React.FC = () => {
             </div>
           </div>
           <div className="mt-4">
-            <div className="text-2xl font-black text-slate-900">18 Drops</div>
+            <div className="text-2xl font-black text-slate-900">{overviewData.scheduledDrops} Drops</div>
             <div className="flex items-center gap-1.5 mt-2 text-xs text-slate-500 font-medium">
               <Check className="w-3.5 h-3.5 text-sky-600 stroke-[3]" />
               <span>12 Reels / 6 Carousel posts</span>
@@ -170,7 +190,7 @@ export const OverviewPage: React.FC = () => {
             </div>
           </div>
           <div className="mt-4">
-            <div className="text-2xl font-black text-slate-900">42 Assets</div>
+            <div className="text-2xl font-black text-slate-900">{overviewData.completedAssets} Assets</div>
             <div className="flex items-center gap-1.5 mt-2 text-xs text-slate-500 font-medium">
               <span className="font-bold text-slate-800">98.4%</span>
               <span>on-time delivery velocity</span>
@@ -179,6 +199,43 @@ export const OverviewPage: React.FC = () => {
           <div className="absolute bottom-0 left-0 right-0 h-1 bg-cyan-500" />
         </div>
       </div>
+
+      {isCampaignModalOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
+            <h2 className="text-base font-black text-slate-900">Create New Campaign</h2>
+            <p className="text-xs text-slate-500 mt-1">Launch a campaign workspace for your marketing and creative teams.</p>
+            <form
+              className="mt-5 space-y-4"
+              onSubmit={(event) => {
+                event.preventDefault();
+                const name = campaignName.trim();
+                if (!name) return;
+                addCampaign({ name });
+                setCampaignName('');
+                setIsCampaignModalOpen(false);
+                showToast(`Campaign "${name}" created successfully!`, 'success');
+              }}
+            >
+              <label className="block text-xs font-semibold text-slate-700">
+                Campaign Name
+                <input
+                  autoFocus
+                  required
+                  value={campaignName}
+                  onChange={(event) => setCampaignName(event.target.value)}
+                  placeholder="e.g. Winter Capsule Launch"
+                  className="w-full mt-1.5 px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs text-slate-900 focus:outline-none focus:border-sky-500 focus:bg-white"
+                />
+              </label>
+              <div className="flex justify-end gap-2">
+                <button type="button" onClick={() => setIsCampaignModalOpen(false)} className="px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100">Cancel</button>
+                <button type="submit" className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-[#0284c7] hover:bg-[#0369a1]">Create Campaign</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* 3. Three Hub Action Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

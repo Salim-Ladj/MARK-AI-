@@ -19,7 +19,7 @@ import {
 import { Brand } from '../../types';
 
 export const BrandsPage: React.FC = () => {
-  const { brands, setSelectedBrand, addBrand, showToast } = useApp();
+  const { brands, setSelectedBrand, addBrand, updateBrand, showToast } = useApp();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [industryFilter, setIndustryFilter] = useState('All Industries');
@@ -733,6 +733,10 @@ export const BrandsPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => {
+                    updateBrand('brand-urbana', {
+                      toneOfVoice: ['Rebellious', 'Sophisticated Berber', 'Authentic'],
+                      positioning: 'Strict avoidance of generic Orientalist tropes; emphasize high-fashion brutalism & Casbah youth culture.'
+                    });
                     setIsEditModalOpen(false);
                     showToast('Brand guidelines updated and deployed to AI Studio agents!', 'success');
                   }}
